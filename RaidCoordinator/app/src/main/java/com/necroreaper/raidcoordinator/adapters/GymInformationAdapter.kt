@@ -1,21 +1,29 @@
 package com.necroreaper.raidcoordinator.adapters
 
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.necroreaper.raidcoordinator.Gym
+import com.necroreaper.raidcoordinator.R
 import com.necroreaper.raidcoordinator.ui.main.MainViewModel
 
 class GymListAdapter(private val viewModel: MainViewModel)
     : ListAdapter<Gym, GymListAdapter.VH>(GymDiff()) {
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val v = LayoutInflater.from(parent.context).inflate(R.layout.gym, parent, false)
+        return VH(v)
     }
 
     override fun onBindViewHolder(holder: VH, position: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        holder.bind(this.getItem(position))
     }
 
     class GymDiff : DiffUtil.ItemCallback<Gym>() {
@@ -32,8 +40,19 @@ class GymListAdapter(private val viewModel: MainViewModel)
     }
 
     inner class VH(v: View) : RecyclerView.ViewHolder(v) {
-        fun bind(gym: Gym){
 
+        private val nameTV = v.findViewById<TextView>(R.id.name)
+        private val locationTV = v.findViewById<TextView>(R.id.location)
+        private val goingCountTV = v.findViewById<TextView>(R.id.location)
+        private val layout = v.findViewById<ConstraintLayout>(R.id.gymInstance)
+
+        fun bind(gym: Gym){
+            nameTV.text = gym.name
+            locationTV.text = gym.location
+            goingCountTV.text = gym.events.size.toString()
+            layout.setOnClickListener{
+
+            }
         }
     }
 }

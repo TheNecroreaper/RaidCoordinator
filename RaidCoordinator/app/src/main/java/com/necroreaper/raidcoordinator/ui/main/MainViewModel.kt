@@ -1,7 +1,16 @@
 package com.necroreaper.raidcoordinator.ui.main
 
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.*
+import com.necroreaper.raidcoordinator.Gym
 
 class MainViewModel : ViewModel() {
-    // TODO: Implement the ViewModel
+    private var nearbyGyms = MutableLiveData<List<Gym>>()
+
+    var username: String = "TempName"
+
+    fun getGyms(): LiveData<List<Gym>>{
+        return nearbyGyms
+    }
+
+
 }
