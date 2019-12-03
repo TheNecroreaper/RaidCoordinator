@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "481903426071",
+    "firebase_url": "https://raidcoo-b4f56.firebaseio.com",
+    "project_id": "raidcoo-b4f56",
+    "storage_bucket": "raidcoo-b4f56.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:481903426071:android:829d202ebffdfe8f39fa52",
+        "android_client_info": {
+          "package_name": "com.necroreaper.raidcoordinator"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "481903426071-770oigs1kqtf9pbg33vb8amn5d8gmoa1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.necroreaper.raidcoordinator",
+            "certificate_hash": "e428b9e745b2d1bd2a78138cc14779f2f91ce55b"
+          }
+        },
+        {
+          "client_id": "481903426071-3tebgkc6bpqpve4v6b3ptm8462gvfh5d.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAhi47Ivkmc1htXELXAOI7FQSnzw4V6Sfg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "481903426071-3tebgkc6bpqpve4v6b3ptm8462gvfh5d.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

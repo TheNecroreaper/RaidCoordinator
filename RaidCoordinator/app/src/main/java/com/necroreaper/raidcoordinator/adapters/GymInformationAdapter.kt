@@ -3,18 +3,18 @@ package com.necroreaper.raidcoordinator.adapters
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.necroreaper.raidcoordinator.Gym
+import com.necroreaper.raidcoordinator.dataTypes.Gym
+import com.necroreaper.raidcoordinator.MainActivity
 import com.necroreaper.raidcoordinator.R
 import com.necroreaper.raidcoordinator.ui.main.MainViewModel
 
-class GymListAdapter(private val viewModel: MainViewModel)
+class GymListAdapter(private val viewModel: MainViewModel, private val activity: MainActivity)
     : ListAdapter<Gym, GymListAdapter.VH>(GymDiff()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
@@ -35,6 +35,8 @@ class GymListAdapter(private val viewModel: MainViewModel)
         override fun areContentsTheSame(oldItem: Gym, newItem: Gym): Boolean {
             return oldItem.name == newItem.name
                     && oldItem.location == newItem.location
+//                    && oldItem.longitude == newItem.longitude
+//                    && oldItem.latitude == newItem.latitude
                     && oldItem.events == newItem.events
         }
     }
@@ -42,16 +44,18 @@ class GymListAdapter(private val viewModel: MainViewModel)
     inner class VH(v: View) : RecyclerView.ViewHolder(v) {
 
         private val nameTV = v.findViewById<TextView>(R.id.name)
-        private val locationTV = v.findViewById<TextView>(R.id.location)
-        private val goingCountTV = v.findViewById<TextView>(R.id.location)
+        private val locationBT = v.findViewById<ImageButton>(R.id.location)
+        private val eventCountTV = v.findViewById<TextView>(R.id.eventCount)
         private val layout = v.findViewById<ConstraintLayout>(R.id.gymInstance)
 
         fun bind(gym: Gym){
             nameTV.text = gym.name
-            locationTV.text = gym.location
-            goingCountTV.text = gym.events.size.toString()
-            layout.setOnClickListener{
+            locationBT.setOnClickListener{
 
+            }
+            eventCountTV.text = gym.events.size.toString()
+            layout.setOnClickListener{
+                activity.setGymInstance(gym)
             }
         }
     }

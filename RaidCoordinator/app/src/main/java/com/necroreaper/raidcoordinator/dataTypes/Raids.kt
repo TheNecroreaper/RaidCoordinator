@@ -1,4 +1,4 @@
-package com.necroreaper.raidcoordinator
+package com.necroreaper.raidcoordinator.dataTypes
 
 import java.util.*
 import kotlin.collections.HashSet

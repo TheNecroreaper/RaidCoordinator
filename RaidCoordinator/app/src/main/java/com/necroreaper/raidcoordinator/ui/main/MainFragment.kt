@@ -7,9 +7,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.necroreaper.raidcoordinator.Gym
+import com.necroreaper.raidcoordinator.dataTypes.Gym
+import com.necroreaper.raidcoordinator.MainActivity
 import com.necroreaper.raidcoordinator.R
-import com.necroreaper.raidcoordinator.Raids
+import com.necroreaper.raidcoordinator.dataTypes.Raids
 import com.necroreaper.raidcoordinator.adapters.GymListAdapter
 import kotlinx.android.synthetic.main.main_fragment.*
 import java.util.*
@@ -23,28 +24,33 @@ class MainFragment : Fragment() {
     var setFourPlayers: Set<String> = setOf("")
 
     var setOneRaids: Set<Raids> = setOf(
-        Raids(HashSet(setOnePlayers),
+        Raids(
+            HashSet(setOnePlayers),
             1,
             Date()
         ),
-        Raids(HashSet(setTwoPlayers),
+        Raids(
+            HashSet(setTwoPlayers),
             2,
             Date()
         )
     )
     var setTwoRaids: Set<Raids> = setOf()
     var setThreeRaids: Set<Raids> = setOf(
-        Raids(HashSet(setThreePlayers),
+        Raids(
+            HashSet(setThreePlayers),
             1,
             Date()
         ),
-        Raids(HashSet(setFourPlayers),
+        Raids(
+            HashSet(setFourPlayers),
             2,
             Date()
         )
     )
     var setFourRaids: Set<Raids> = setOf(
-        Raids(HashSet(setThreePlayers),
+        Raids(
+            HashSet(setThreePlayers),
             1,
             Date()
         )
@@ -53,7 +59,12 @@ class MainFragment : Fragment() {
     var tempList: List<Gym> = listOf(
         Gym("Gym1", "Location1", HashSet(setOneRaids), 0),
         Gym("Gym2", "Location2", HashSet(setTwoRaids), 0),
-        Gym("Gym3", "Location3", HashSet(setThreeRaids), 0),
+        Gym(
+            "Gym3",
+            "Location3",
+            HashSet(setThreeRaids),
+            0
+        ),
         Gym("Gym4", "Location4", HashSet(setFourRaids), 0)
     )
 
@@ -74,7 +85,7 @@ class MainFragment : Fragment() {
             ViewModelProviders.of(this)[MainViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
 
-        gymAdapter = GymListAdapter(viewModel)
+        gymAdapter = GymListAdapter(viewModel, activity as MainActivity)
 
 
         return inflater.inflate(R.layout.main_fragment, container, false)

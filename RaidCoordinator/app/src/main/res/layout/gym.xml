@@ -22,17 +22,31 @@
             android:textSize="16sp"
             android:padding="6dp"
             app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             />
-        <TextView
+
+        <ImageButton
             android:id="@+id/location"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:padding="6dp"
+            android:src="@drawable/ic_directions_walk_black_24dp"
             app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@id/name"
-            />
+            android:maxHeight="16sp"
+            android:maxWidth="16sp"/>
+        <TextView
+            android:id="@+id/eventCountTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="# of Raids: "
+            android:paddingVertical="6dp"
+            android:paddingRight="6dp"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toStartOf="@id/eventCount"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
         <TextView
             android:id="@+id/eventCount"
             android:layout_width="wrap_content"
@@ -40,7 +54,10 @@
             android:padding="6dp"
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             />
+
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

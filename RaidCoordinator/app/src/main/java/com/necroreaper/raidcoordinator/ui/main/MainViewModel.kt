@@ -1,7 +1,7 @@
 package com.necroreaper.raidcoordinator.ui.main
 
 import androidx.lifecycle.*
-import com.necroreaper.raidcoordinator.Gym
+import com.necroreaper.raidcoordinator.dataTypes.Gym
 
 class MainViewModel : ViewModel() {
     private var nearbyGyms = MutableLiveData<List<Gym>>()
@@ -11,6 +11,5 @@ class MainViewModel : ViewModel() {
     fun getGyms(): LiveData<List<Gym>>{
         return nearbyGyms
     }
-
 
 }
