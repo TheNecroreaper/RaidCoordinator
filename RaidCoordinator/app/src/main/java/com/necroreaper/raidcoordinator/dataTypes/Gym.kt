@@ -1,15 +1,12 @@
 package com.necroreaper.raidcoordinator.dataTypes
 
-import kotlin.collections.HashSet
+import com.google.firebase.firestore.GeoPoint
 
 
 data class Gym (
-    val name: String,
-//    val location: String,
-    val longitude: Double,
-    val latitude: Double,
-    val events: HashSet<Raids>,
-    val id: Int
+    val name: String? = null,
+    val location: GeoPoint? = null,
+    val id: Int? = null
 ) {
 
 }

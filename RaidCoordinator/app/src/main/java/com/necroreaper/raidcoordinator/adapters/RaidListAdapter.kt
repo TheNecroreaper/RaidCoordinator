@@ -50,9 +50,9 @@ class RaidListAdapter(private val viewModel: MainViewModel, private val activity
 //        private val timeLeftTV = v.findViewById<TextView>(R.id.timeLeft)
         fun bind(raid: Raids, gym: Gym){
             tierTV.text = raid.tier.toString()
-            timeTV.text = DateConverter.convertDate(raid.time)
+            timeTV.text = DateConverter.convertDate(raid.time!!)
 //            timeLeftTV.text = timeCompare(raid.time)
-            playerCountTV.text = raid.players.size.toString()
+            playerCountTV.text = raid.players?.size.toString()
             layout.setOnClickListener{
                 activity.setRaidInstance(raid, gym)
             }

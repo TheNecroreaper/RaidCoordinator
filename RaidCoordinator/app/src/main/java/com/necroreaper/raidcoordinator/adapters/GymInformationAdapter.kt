@@ -35,9 +35,6 @@ class GymListAdapter(private val viewModel: MainViewModel, private val activity:
         override fun areContentsTheSame(oldItem: Gym, newItem: Gym): Boolean {
             return oldItem.name == newItem.name
                     && oldItem.location == newItem.location
-//                    && oldItem.longitude == newItem.longitude
-//                    && oldItem.latitude == newItem.latitude
-                    && oldItem.events == newItem.events
         }
     }
 
@@ -51,9 +48,9 @@ class GymListAdapter(private val viewModel: MainViewModel, private val activity:
         fun bind(gym: Gym){
             nameTV.text = gym.name
             locationBT.setOnClickListener{
-
+                activity.setLocationInstance(gym)
             }
-            eventCountTV.text = gym.events.size.toString()
+            eventCountTV.text = viewModel.getRaidCount(gym).toString()
             layout.setOnClickListener{
                 activity.setGymInstance(gym)
             }

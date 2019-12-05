@@ -7,13 +7,13 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.necroreaper.raidcoordinator.MainActivity
 import com.necroreaper.raidcoordinator.dataTypes.Gym
 import com.necroreaper.raidcoordinator.R
 import com.necroreaper.raidcoordinator.dataTypes.Raids
 import com.necroreaper.raidcoordinator.adapters.PlayerListAdapter
 import com.necroreaper.raidcoordinator.stringConverters.DateConverter
-import kotlinx.android.synthetic.main.gym_instance.backArrow
-import kotlinx.android.synthetic.main.gym_instance.gymName
+import kotlinx.android.synthetic.main.gym_instance.*
 import kotlinx.android.synthetic.main.raid_instance.*
 
 class RaidFragment(raid: Raids, gym: Gym) : Fragment() {
@@ -47,11 +47,13 @@ class RaidFragment(raid: Raids, gym: Gym) : Fragment() {
             activity?.onBackPressed()
         }
         raidGymName.text = currentGym.name
-
-        raidTime.text = DateConverter.convertDate(currentRaid.time)
+        directionsButtonRaid.setOnClickListener {
+            (activity as MainActivity).setLocationInstance(currentGym)
+        }
+        raidTime.text = DateConverter.convertDate(currentRaid.time!!)
         playerRecycler.adapter = playerAdapter
         playerRecycler.layoutManager = LinearLayoutManager(context)
 
-        playerAdapter.submitList(currentRaid.players.toList())
+        playerAdapter.submitList(currentRaid.players!!.toList())
     }
 }

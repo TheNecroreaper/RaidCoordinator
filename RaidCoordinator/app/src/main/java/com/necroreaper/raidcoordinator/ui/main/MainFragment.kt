@@ -2,10 +2,12 @@ package com.necroreaper.raidcoordinator.ui.main
 
 import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.necroreaper.raidcoordinator.dataTypes.Gym
 import com.necroreaper.raidcoordinator.MainActivity
@@ -13,60 +15,9 @@ import com.necroreaper.raidcoordinator.R
 import com.necroreaper.raidcoordinator.dataTypes.Raids
 import com.necroreaper.raidcoordinator.adapters.GymListAdapter
 import kotlinx.android.synthetic.main.main_fragment.*
-import java.util.*
 import kotlin.collections.HashSet
 
 class MainFragment : Fragment() {
-
-    var setOnePlayers: Set<String> = setOf("player1", "player2")
-    var setTwoPlayers: Set<String> = setOf()
-    var setThreePlayers: Set<String> = setOf("testPlayers")
-    var setFourPlayers: Set<String> = setOf("")
-
-    var setOneRaids: Set<Raids> = setOf(
-        Raids(
-            HashSet(setOnePlayers),
-            1,
-            Date()
-        ),
-        Raids(
-            HashSet(setTwoPlayers),
-            2,
-            Date()
-        )
-    )
-    var setTwoRaids: Set<Raids> = setOf()
-    var setThreeRaids: Set<Raids> = setOf(
-        Raids(
-            HashSet(setThreePlayers),
-            1,
-            Date()
-        ),
-        Raids(
-            HashSet(setFourPlayers),
-            2,
-            Date()
-        )
-    )
-    var setFourRaids: Set<Raids> = setOf(
-        Raids(
-            HashSet(setThreePlayers),
-            1,
-            Date()
-        )
-    )
-
-    var tempList: List<Gym> = listOf(
-        Gym("Gym1", "Location1", HashSet(setOneRaids), 0),
-        Gym("Gym2", "Location2", HashSet(setTwoRaids), 0),
-        Gym(
-            "Gym3",
-            "Location3",
-            HashSet(setThreeRaids),
-            0
-        ),
-        Gym("Gym4", "Location4", HashSet(setFourRaids), 0)
-    )
 
 
     companion object {
@@ -95,7 +46,15 @@ class MainFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
         gymRecycler.adapter = gymAdapter
         gymRecycler.layoutManager = LinearLayoutManager(context)
-        gymAdapter.submitList(tempList)
+        viewModel.getGyms()
+        gymSwipeRefresh.setOnRefreshListener {
+            viewModel.getGyms()
+            gymSwipeRefresh.isRefreshing = false
+        }
+        viewModel.observeGyms().observe(this, Observer {
+            gymAdapter.submitList(it)
+        })
+        //gymAdapter.submitList(tempList)
     }
 
 }

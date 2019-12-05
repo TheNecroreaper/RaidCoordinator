@@ -1,11 +1,12 @@
 package com.necroreaper.raidcoordinator.stringConverters
 
-import java.util.*
+import com.google.firebase.Timestamp
 
 class DateConverter {
     companion object {
-        fun convertDate (date: Date): String
+        fun convertDate (time: Timestamp): String
         {
+            var date = time.toDate()
             var convertedString = ""
             var hours = date.hours
             var timePeriod = " AM"

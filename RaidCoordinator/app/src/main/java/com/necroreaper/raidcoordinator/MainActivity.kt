@@ -2,28 +2,29 @@ package com.necroreaper.raidcoordinator
 
 import android.app.Activity
 import android.content.Intent
-import android.database.sqlite.SQLiteDatabase
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import androidx.lifecycle.ViewModelProviders
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.IdpResponse
 import com.google.firebase.auth.FirebaseAuth
 import com.necroreaper.raidcoordinator.dataTypes.Gym
 import com.necroreaper.raidcoordinator.dataTypes.Raids
-import com.necroreaper.raidcoordinator.gymDatabase.DatabaseHelper
-import com.necroreaper.raidcoordinator.ui.main.GymFragment
-import com.necroreaper.raidcoordinator.ui.main.MainFragment
-import com.necroreaper.raidcoordinator.ui.main.RaidFragment
-import java.io.IOException
+import com.necroreaper.raidcoordinator.ui.main.*
+import android.net.Uri
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat.getSystemService
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+
+
+
 
 class MainActivity : AppCompatActivity() {
 
     private val RC_SIGN_IN = 10
+    private lateinit var viewModel: MainViewModel
 
-
-    private lateinit var gymDb: SQLiteDatabase
-    private lateinit var dbHelper: DatabaseHelper
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
@@ -49,16 +50,8 @@ class MainActivity : AppCompatActivity() {
                 .build(),
             RC_SIGN_IN)
 
-
-        //Sets up the sqlite database
-
-        dbHelper = DatabaseHelper(this)
-        try {
-            dbHelper.createDatabase()
-        } catch (e: IOException) {
-            Log.e("DB", "Fail to create database")
-        }
-        gymDb = dbHelper.readableDatabase
+        viewModel = ViewModelProviders.of(this)[MainViewModel::class.java]
+        viewModel.init(mUser!!, this)
     }
 
     fun setGymInstance(gym: Gym){
@@ -72,7 +65,32 @@ class MainActivity : AppCompatActivity() {
             .addToBackStack(null)
             .commit()
     }
+    //https://stackoverflow.com/questions/6560345/suppressing-google-maps-intent-selection-dialog
+    fun setLocationInstance(gym: Gym){
+        val intent = Intent(
+            android.content.Intent.ACTION_VIEW,
+            Uri.parse("http://maps.google.com/maps?daddr=0,0%20(Imaginary%20Place)&dirflg=r")
+        )
+        if (isAppInstalled("com.google.android.apps.maps")) {
+            intent.setClassName(
+                "com.google.android.apps.maps",
+                "com.google.android.maps.MapsActivity"
+            )
+        }
+        startActivity(intent)
+    }
+    private fun isAppInstalled(uri: String): Boolean {
+        val pm = applicationContext.packageManager
+        var app_installed = false
+        try {
+            pm.getPackageInfo(uri, PackageManager.GET_ACTIVITIES)
+            app_installed = true
+        } catch (e: PackageManager.NameNotFoundException) {
+            app_installed = false
+        }
 
+        return app_installed
+    }
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
