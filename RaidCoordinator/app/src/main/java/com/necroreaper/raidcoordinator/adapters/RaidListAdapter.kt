@@ -57,6 +57,7 @@ class RaidListAdapter(private val viewModel: MainViewModel, private val activity
                 activity.setRaidInstance(raid, gym)
             }
             goingBT.setOnClickListener{
+                viewModel.updatePlayers(raid)
                 //layout.setBackgroundColor()
             }
         }

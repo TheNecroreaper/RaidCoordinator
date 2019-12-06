@@ -1,15 +1,13 @@
 package com.necroreaper.raidcoordinator.ui.main
 
-import android.app.Dialog
-import android.app.DialogFragment
-import android.app.TimePickerDialog
+
 import android.os.Bundle
 import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TimePicker
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.necroreaper.raidcoordinator.MainActivity
@@ -17,7 +15,6 @@ import com.necroreaper.raidcoordinator.dataTypes.Gym
 import com.necroreaper.raidcoordinator.R
 import com.necroreaper.raidcoordinator.adapters.RaidListAdapter
 import kotlinx.android.synthetic.main.gym_instance.*
-import java.util.*
 
 class GymFragment(gym: Gym) : Fragment() {
 
@@ -51,28 +48,21 @@ class GymFragment(gym: Gym) : Fragment() {
         directionsButton.setOnClickListener {
             (activity as MainActivity).setLocationInstance(currentGym)
         }
+        addRaid.setOnClickListener{
+            activity?.supportFragmentManager?.beginTransaction()!!.replace(R.id.container, AdditionFragment(currentGym))
+                .addToBackStack(null)
+                .commit()
+        }
         gymName.text = currentGym.name
         raidRecycler.adapter = raidAdapter
         raidRecycler.layoutManager = LinearLayoutManager(context)
-        raidAdapter.submitList(viewModel.getGymsRaids(currentGym))
-    }
-//    fun showTimePickerDialog(v: View) {
-//        TimePickerFragment().show(activity!!.supportFragmentManager, "timePicker")
-//    }
-}
-class TimePickerFragment : DialogFragment(), TimePickerDialog.OnTimeSetListener {
+        viewModel.getRaids()
+        viewModel.observeRaids().observe(this,
+            Observer {raidAdapter.submitList(viewModel.getGymsRaids(currentGym).sortedBy {
+                it.time
+            })
+        })
 
-    override fun onCreateDialog(savedInstanceState: Bundle): Dialog {
-        // Use the current time as the default values for the picker
-        val c = Calendar.getInstance()
-        val hour = c.get(Calendar.HOUR_OF_DAY)
-        val minute = c.get(Calendar.MINUTE)
-
-        // Create a new instance of TimePickerDialog and return it
-        return TimePickerDialog(activity, this, hour, minute, DateFormat.is24HourFormat(activity))
     }
 
-    override fun onTimeSet(view: TimePicker, hourOfDay: Int, minute: Int) {
-        // Do something with the time chosen by the user
-    }
 }

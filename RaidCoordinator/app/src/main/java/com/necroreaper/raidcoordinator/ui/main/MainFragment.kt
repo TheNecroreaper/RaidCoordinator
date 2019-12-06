@@ -9,10 +9,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.necroreaper.raidcoordinator.dataTypes.Gym
 import com.necroreaper.raidcoordinator.MainActivity
 import com.necroreaper.raidcoordinator.R
-import com.necroreaper.raidcoordinator.dataTypes.Raids
 import com.necroreaper.raidcoordinator.adapters.GymListAdapter
 import kotlinx.android.synthetic.main.main_fragment.*
 import kotlin.collections.HashSet
@@ -46,15 +44,20 @@ class MainFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
         gymRecycler.adapter = gymAdapter
         gymRecycler.layoutManager = LinearLayoutManager(context)
-        viewModel.getGyms()
+
+        viewModel.getLocation().observe(this, Observer {
+            viewModel.getGymsNearby()
+        })
         gymSwipeRefresh.setOnRefreshListener {
-            viewModel.getGyms()
+            viewModel.getGymsNearby()
             gymSwipeRefresh.isRefreshing = false
         }
+        viewModel.observeRaids().observe(this, Observer {
+            gymAdapter.submitList(viewModel.observeGyms().value)
+        })
         viewModel.observeGyms().observe(this, Observer {
             gymAdapter.submitList(it)
         })
         //gymAdapter.submitList(tempList)
     }
-
 }

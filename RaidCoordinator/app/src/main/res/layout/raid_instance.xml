@@ -46,8 +46,16 @@
                     android:maxWidth="25dp"
                     android:minWidth="25dp"
                     android:src="@drawable/ic_directions_walk_black_24dp"
-                    app:layout_constraintEnd_toEndOf="@+id/raidGymName"
+                    app:layout_constraintEnd_toStartOf="@+id/goingRaid"
                     app:layout_constraintTop_toTopOf="parent" />
+                <ImageButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/goingRaid"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:src="@drawable/ic_add_black_24dp"
+                    />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <TextView

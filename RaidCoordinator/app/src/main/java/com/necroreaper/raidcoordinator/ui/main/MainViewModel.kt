@@ -1,99 +1,110 @@
 package com.necroreaper.raidcoordinator.ui.main
 
 import android.Manifest
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
+import android.os.Build
 import android.util.Log
+import android.util.LruCache
 import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.*
-import com.google.android.gms.auth.api.Auth
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.SetOptions
 import com.necroreaper.raidcoordinator.MainActivity
+import com.necroreaper.raidcoordinator.R
 import com.necroreaper.raidcoordinator.dataTypes.Gym
 import com.necroreaper.raidcoordinator.dataTypes.Raids
+import com.necroreaper.raidcoordinator.stringConverters.DateConverter
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import java.util.*
+import kotlin.collections.HashMap
+import kotlin.collections.HashSet
+import kotlin.math.absoluteValue
 
 class MainViewModel : ViewModel() {
-    private var nearbyGyms = MutableLiveData<List<Gym>>()
 
+    private var allGyms = listOf<Gym>()
     private lateinit var db: FirebaseFirestore
-    private lateinit var curUser: FirebaseUser
+    lateinit var curUser: FirebaseUser
     private var gyms = MutableLiveData<List<Gym>>()
     private var raids = MutableLiveData<List<Raids>>()
     private var raidsToGymMap = HashMap<String,HashSet<Raids>>()
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var mainActivity: MainActivity
-    private val LOCATION_REQUEST_CODE = 101
 
+    private var raidsAttending = HashSet<Raids>()
+    private var location = MutableLiveData<Location>()
     fun init(user: FirebaseUser, activity: MainActivity) {
         db = FirebaseFirestore.getInstance()
         if (db == null) {
             Log.d("Error", "XXX FirebaseFirestore is null!")
         }
         curUser = user
+        Log.d("username", user.displayName)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity)
         mainActivity = activity
     }
 
+    fun setLocation(location: Location){
+        this.location.postValue(location)
+    }
 
-    private fun getNearbyGyms(distance: Double): List<GeoPoint>{
-        val lat = 0.0144927536231884
-        val lon = 0.0181818181818182
+    fun getLocation(): LiveData<Location>{
+        return location
+    }
 
-        var latitude = .0
-        var longitude = .0
-        val permission = ContextCompat.checkSelfPermission(mainActivity,
-            Manifest.permission.ACCESS_FINE_LOCATION)
+    private fun nearby(gymGeoPoint: GeoPoint, distance: Double): Boolean{
 
-        if (permission != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(mainActivity,
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_REQUEST_CODE
-            )
+        var gymLocation = Location("")
+        gymLocation.latitude = gymGeoPoint.latitude
+        gymLocation.longitude = gymGeoPoint.longitude
+        if (location.value != null) {
+            return location.value!!.distanceTo(gymLocation) < distance * 1000
         }
 
-        fusedLocationClient.lastLocation
-            .addOnSuccessListener { location : Location? ->
-                longitude = location!!.longitude
-                latitude = location!!.latitude
-            }
-
-        val lowerLat = latitude - (lat * distance)
-        val lowerLon = longitude - (lon * distance)
-
-        val upperLat = latitude + (lat * distance)
-        val upperLon = longitude + (lon * distance)
-
-        val lowerGeo = GeoPoint(lowerLat, lowerLon)
-        val upperGeo = GeoPoint(upperLat, upperLon)
-        return listOf(lowerGeo, upperGeo)
+        return false
     }
 
     fun observeGyms(): LiveData<List<Gym>> {
         return gyms
     }
-    fun getGyms(): LiveData<List<Gym>>{
-        val nearbyBounds = getNearbyGyms(1.0)
 
-        db.collection("gyms").whereGreaterThan("location", nearbyBounds[0])
-                .get().addOnSuccessListener { document ->
+    fun observeRaids(): LiveData<List<Raids>>{
+        return raids
+    }
+    fun getGyms(){
+        db.collection("gyms").get().addOnSuccessListener { document ->
             if (document != null) {
-                gyms.value = document.mapNotNull {
+                allGyms = document.mapNotNull {
                     it.toObject(Gym::class.java)
                 }
+                getGymsNearby()
             } else {
                 Log.d("Error", "No such document")
             }
         }.addOnFailureListener { exception ->
-                Log.d("Error", "get failed with ", exception)
-            }
+            Log.d("Error", "get failed with ", exception)
+        }
         getRaids()
-        return nearbyGyms
+    }
+    fun getGymsNearby(){
+        var nearbyGym = allGyms.filter{
+            nearby(it.location!!, 1.0)
+        }
+        gyms.postValue(nearbyGym)
     }
 
     fun getRaids(specificGym: Gym? = null){
@@ -109,20 +120,27 @@ class MainViewModel : ViewModel() {
             raids.value = querySnapshot.documents.mapNotNull {
                 it.toObject(Raids::class.java)
             }
-            if (specificGym == null)
-                mapToGyms()
+            mapToGyms()
         }
     }
 
     private fun mapToGyms() {
-        raidsToGymMap = HashMap()
+        raidsToGymMap.clear()
         raids.value?.forEach {
-            var newRaids = setOf(it)
-            if(raidsToGymMap.containsKey(it.gym)) {
-                newRaids = raidsToGymMap.get(it.gym)!!
-                newRaids.add(it)
+            if(it.time!!.toDate().after(Date())) {
+                var newRaids = setOf(it)
+                if (raidsToGymMap.containsKey(it.gym)) {
+                    newRaids = raidsToGymMap.get(it.gym)!!
+                    newRaids.add(it)
+                }
+                raidsToGymMap.set(it.gym!!, newRaids.toHashSet())
             }
-            raidsToGymMap.set(it.gym!!, newRaids.toHashSet())
+            raidsAttending.forEach {attending ->
+                if (attending == it) {
+                    mainActivity.createNotification(it)
+                }
+            }
+
         }
     }
 
@@ -133,11 +151,42 @@ class MainViewModel : ViewModel() {
 
     fun getGymsRaids(specificGym: Gym): List<Raids>{
         var gymRaids = raidsToGymMap.get(specificGym.name)
-        Log.d("test", "test")
-        gymRaids?.forEach{
-            Log.d("test", it.gym)
-            Log.d("test", it.tier.toString())
-        }
-        return if (gymRaids == null)  listOf() else gymRaids.toList()
+        return if (gymRaids == null)  listOf() else gymRaids.toList().asReversed()
     }
+
+    fun submitRaids(gym: Gym, tier: Int, time: Timestamp){
+        val players = listOf(curUser.email!!)
+        val data = hashMapOf(
+            "gym" to gym.name,
+            "tier" to tier,
+            "time" to time,
+            "players" to players
+        )
+
+        db.collection("raids")
+            .add(data)
+            .addOnSuccessListener { documentReference ->
+                Log.d("Success", "DocumentSnapshot written with ID: ${documentReference.id}")
+            }
+            .addOnFailureListener { e ->
+                Log.w("Error", "Error adding document", e)
+            }
+        raidsAttending.add(Raids(gym.name, players, tier, time))
+    }
+    fun updatePlayers(raid: Raids){
+        db.collection("raids").whereEqualTo("gym", raid.gym)
+                                                         .whereEqualTo("time",raid.time)
+                                                         .whereEqualTo("tier",raid.tier).get().addOnSuccessListener {
+                var playersList = it.documents[0].get("players") as List<String>
+                var playersSet = playersList.toHashSet()
+                playersSet.add(curUser.displayName!!)
+                var data = hashMapOf("players" to playersSet.toList())
+                var document = db.collection("raids").document(it.documents[0].id)
+                document.set(data, SetOptions.merge())
+                raidsAttending.add(raid)
+            }
+
+    }
+
+
 }

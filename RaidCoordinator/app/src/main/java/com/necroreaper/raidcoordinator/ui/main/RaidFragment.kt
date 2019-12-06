@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.necroreaper.raidcoordinator.MainActivity
@@ -46,6 +47,9 @@ class RaidFragment(raid: Raids, gym: Gym) : Fragment() {
         backArrowRaid.setOnClickListener {
             activity?.onBackPressed()
         }
+        goingRaid.setOnClickListener{
+            viewModel.updatePlayers(currentRaid)
+        }
         raidGymName.text = currentGym.name
         directionsButtonRaid.setOnClickListener {
             (activity as MainActivity).setLocationInstance(currentGym)
@@ -53,7 +57,10 @@ class RaidFragment(raid: Raids, gym: Gym) : Fragment() {
         raidTime.text = DateConverter.convertDate(currentRaid.time!!)
         playerRecycler.adapter = playerAdapter
         playerRecycler.layoutManager = LinearLayoutManager(context)
+        viewModel.getRaids()
+        viewModel.observeRaids().observe(this, Observer {
+            playerAdapter.submitList(currentRaid.players!!.toList())
+        })
 
-        playerAdapter.submitList(currentRaid.players!!.toList())
     }
 }
