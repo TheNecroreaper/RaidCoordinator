@@ -155,7 +155,7 @@ class MainViewModel : ViewModel() {
     }
 
     fun submitRaids(gym: Gym, tier: Int, time: Timestamp){
-        val players = listOf(curUser.email!!)
+        val players = listOf(curUser.displayName!!)
         val data = hashMapOf(
             "gym" to gym.name,
             "tier" to tier,

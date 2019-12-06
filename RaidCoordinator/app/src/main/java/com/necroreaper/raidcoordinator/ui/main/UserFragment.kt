@@ -50,7 +50,15 @@ class UserFragment : Fragment(){
             AuthUI.getInstance()
                 .signOut(context!!)
                 .addOnCompleteListener {
-                    activity?.onBackPressed()
+                    val providers = arrayListOf(
+                        AuthUI.IdpConfig.EmailBuilder().build(),
+                        AuthUI.IdpConfig.GoogleBuilder().build())
+                    startActivityForResult(
+                        AuthUI.getInstance()
+                            .createSignInIntentBuilder()
+                            .setAvailableProviders(providers)
+                            .build(),
+                        101)
                 }
         }
     }

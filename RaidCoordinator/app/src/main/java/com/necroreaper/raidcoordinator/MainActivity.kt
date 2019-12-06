@@ -9,7 +9,6 @@ import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import androidx.lifecycle.ViewModelProviders
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.IdpResponse
@@ -24,11 +23,6 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.core.app.NotificationCompat
 import com.necroreaper.raidcoordinator.stringConverters.DateConverter
-import kotlin.jvm.internal.MagicApiIntrinsics
-import androidx.core.app.ComponentActivity
-import androidx.core.app.ComponentActivity.ExtraData
-import androidx.core.content.ContextCompat.getSystemService
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
@@ -65,6 +59,7 @@ class MainActivity : AppCompatActivity() {
                         .replace(R.id.container, MainFragment.newInstance())
                         .commitNow()
             }
+            viewModel.getGyms()
         } ?: startActivityForResult(
             AuthUI.getInstance()
                 .createSignInIntentBuilder()
@@ -83,7 +78,7 @@ class MainActivity : AppCompatActivity() {
 
         mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 6000L,
             100.0f, mLocationListener)
-        viewModel.getGyms()
+
 
     }
 
@@ -118,30 +113,12 @@ class MainActivity : AppCompatActivity() {
 
     //https://stackoverflow.com/questions/6560345/suppressing-google-maps-intent-selection-dialog
     fun setLocationInstance(gym: Gym){
-        val intent = Intent(
-            android.content.Intent.ACTION_VIEW,
-            Uri.parse("http://maps.google.com/maps?daddr=0,0%20(Imaginary%20Place)&dirflg=r")
-        )
-        if (isAppInstalled("com.google.android.apps.maps")) {
-            intent.setClassName(
-                "com.google.android.apps.maps",
-                "com.google.android.maps.MapsActivity"
-            )
-        }
-        startActivity(intent)
+        var gmmIntentUri = Uri.parse("geo:${gym.location!!.latitude},${gym.location!!.longitude}?q=${gym.location!!.latitude},${gym.location!!.longitude}(${gym.name})")
+        var mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
+        mapIntent.setPackage("com.google.android.apps.maps")
+        startActivity(mapIntent)
     }
-    private fun isAppInstalled(uri: String): Boolean {
-        val pm = applicationContext.packageManager
-        var app_installed = false
-        try {
-            pm.getPackageInfo(uri, PackageManager.GET_ACTIVITIES)
-            app_installed = true
-        } catch (e: PackageManager.NameNotFoundException) {
-            app_installed = false
-        }
 
-        return app_installed
-    }
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -152,6 +129,7 @@ class MainActivity : AppCompatActivity() {
                 // Successfully signed in
                 val user = FirebaseAuth.getInstance().currentUser
                 viewModel.init(user!!, this)
+                viewModel.getGyms()
                 supportFragmentManager.beginTransaction()
                     .replace(R.id.container, MainFragment.newInstance())
                     .commitNow()
