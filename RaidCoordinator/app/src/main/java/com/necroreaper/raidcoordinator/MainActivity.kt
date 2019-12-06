@@ -142,8 +142,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
     fun createNotification(raid: Raids) {
-        // Create the NotificationChannel, but only on API 26+ because
-        // the NotificationChannel class is new and not in the support library
+        //https://stackoverflow.com/questions/47409256/what-is-notification-channel-idnotifications-not-work-in-api-27
         val contentTitle = "Raid Coordinator"
         val message = "There are now ${raid.players!!.size} at ${raid.gym} during ${DateConverter.convertDate(raid.time!!)}"
         val mNotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

@@ -26,9 +26,6 @@ import com.necroreaper.raidcoordinator.MainActivity
 import com.necroreaper.raidcoordinator.R
 import com.necroreaper.raidcoordinator.dataTypes.Gym
 import com.necroreaper.raidcoordinator.dataTypes.Raids
-import com.necroreaper.raidcoordinator.stringConverters.DateConverter
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
 import java.util.*
 import kotlin.collections.HashMap
 import kotlin.collections.HashSet
@@ -68,16 +65,21 @@ class MainViewModel : ViewModel() {
 
     private fun nearby(gymGeoPoint: GeoPoint, distance: Double): Boolean{
 
-        var gymLocation = Location("")
-        gymLocation.latitude = gymGeoPoint.latitude
-        gymLocation.longitude = gymGeoPoint.longitude
         if (location.value != null) {
-            return location.value!!.distanceTo(gymLocation) < distance * 1000
+            return distanceTo(gymGeoPoint) < distance * 1000
         }
 
         return false
     }
-
+    private fun distanceTo(gymGeoPoint: GeoPoint): Float{
+        var gymLocation = Location("")
+        gymLocation.latitude = gymGeoPoint.latitude
+        gymLocation.longitude = gymGeoPoint.longitude
+        if (location.value != null) {
+            return location.value!!.distanceTo(gymLocation)
+        }
+        return 0f
+    }
     fun observeGyms(): LiveData<List<Gym>> {
         return gyms
     }
@@ -103,6 +105,9 @@ class MainViewModel : ViewModel() {
     fun getGymsNearby(){
         var nearbyGym = allGyms.filter{
             nearby(it.location!!, 1.0)
+        }
+        nearbyGym.sortedBy {
+            distanceTo(it.location!!)
         }
         gyms.postValue(nearbyGym)
     }
